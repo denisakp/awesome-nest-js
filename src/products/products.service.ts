@@ -1,51 +1,34 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product } from './entities/product.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ProductsService {
-  private lastProductId = 0;
-  private products = [];
+  constructor(
+    @InjectRepository(Product)
+    private productRepository: Repository<Product>,
+  ) {}
 
-  create(createProductDto: CreateProductDto): Product {
-    const newProduct = { id: ++this.lastProductId, ...createProductDto };
-    this.products.push(newProduct);
-    return newProduct;
+  async create(createProductDto: CreateProductDto) {
+    return await this.productRepository.save(createProductDto);
   }
 
-  findAll(): Product[] {
-    return this.products;
+  async findAll(): Promise<Product[]> {
+    return this.productRepository.find();
   }
 
-  findOne(id: number) {
-    const product = this.products.find((product) => product.id === id);
-    if (product) {
-      return product;
-    }
-    throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
+  async findOne(id: number): Promise<Product | null> {
+    return await this.productRepository.findOneBy({ id });
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    const productIndex = this.products.findIndex(
-      (product) => product.id === id,
-    );
-
-    if (productIndex > -1) {
-      this.products[productIndex] = updateProductDto;
-      return updateProductDto;
-    }
-    throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
+  async update(id: number, updateProductDto: UpdateProductDto) {
+    return await this.productRepository.update(id, updateProductDto);
   }
 
-  remove(id: number) {
-    const productIndex = this.products.findIndex(
-      (product) => product.id === id,
-    );
-
-    if (productIndex > -1) {
-      this.products.splice(productIndex, 1);
-    }
-    throw new HttpException('Product not found', HttpStatus.NOT_FOUND);
+  async remove(id: number) {
+    return await this.productRepository.delete(id);
   }
 }
