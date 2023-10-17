@@ -4,11 +4,13 @@ import { AppService } from './app.service';
 import { ProductsModule } from './products/products.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ProfilesModule } from './profiles/profiles.module';
+import { UsersModule } from './users/users.module';
+import { OrdersModule } from './orders/orders.module';
 import * as Joi from 'joi';
 
 @Module({
   imports: [
-    ProductsModule,
     ConfigModule.forRoot({
       cache: true,
       validationSchema: Joi.object({
@@ -33,6 +35,10 @@ import * as Joi from 'joi';
         synchronize: true,
       }),
     }),
+    ProductsModule,
+    ProfilesModule,
+    UsersModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

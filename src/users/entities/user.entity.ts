@@ -1,6 +1,13 @@
 import { UserRole } from 'src/enums/user.role';
+import { Order } from 'src/orders/entities/order.entity';
 import { Profile } from 'src/profiles/entities/profile.entity';
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity('users')
 export class User {
@@ -21,4 +28,7 @@ export class User {
 
   @OneToOne(() => Profile, (profile) => profile.user)
   profile: Profile;
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 }
