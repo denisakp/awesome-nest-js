@@ -1,9 +1,12 @@
 import { OrderStatus } from 'src/enums/order.status';
+import { Product } from 'src/products/entities/product.entity';
 import { User } from 'src/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
@@ -21,6 +24,10 @@ export class Order {
 
   @ManyToOne(() => User, (user) => user.orders)
   user: User;
+
+  @ManyToMany(() => Product)
+  @JoinTable()
+  products: Product[];
 
   @CreateDateColumn()
   created_datetime?: Date;

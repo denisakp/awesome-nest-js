@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
 import { Repository } from 'typeorm';
 import { UsersService } from 'src/users/users.service';
+import { ProductsService } from 'src/products/products.service';
 
 @Injectable()
 export class OrdersService {
@@ -12,6 +13,7 @@ export class OrdersService {
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
     private readonly userService: UsersService,
+    private readonly productService: ProductsService,
   ) {}
 
   async create(userId: number, createOrderDto: CreateOrderDto) {
@@ -20,6 +22,20 @@ export class OrdersService {
     const order = new Order();
     order.amount = createOrderDto.amount;
     order.user = user;
+
+    const products = [];
+
+    for (const product of createOrderDto.products) {
+      try {
+        const dbProduct = await this.productService.findOne(product);
+        products.push(dbProduct);
+      } catch (error) {
+        // We'll update this later
+        console.log('failed to find product with id ' + product);
+      }
+    }
+
+    order.products = products;
 
     return await this.orderRepository.save(order);
   }
@@ -32,7 +48,12 @@ export class OrdersService {
   }
 
   async findOne(id: number): Promise<Order | null> {
-    return await this.orderRepository.findOneBy({ id });
+    return await this.orderRepository.findOne({
+      relations: {
+        products: true,
+      },
+      where: { id },
+    });
   }
 
   async update(id: number, updateOrderDto: UpdateOrderDto) {
